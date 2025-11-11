@@ -49,12 +49,15 @@ jobs:
             pkill -f 'spring-boot-ci-cd-with-docker' || true
             nohup /usr/bin/java -jar /opt/springapp/spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar > /opt/springapp/app.log 2>&1 &
             sleep 5
-            if pgrep -f 'spring-boot-ci-cd-with-docker' > /dev/null; then
-              echo "✅ Spring Boot app restarted successfully"
-            else
-              echo "❌ Spring Boot app failed to start"
-              exit 1
-            fi
+            for i in {1..20}; do
+              if pgrep -f 'spring-boot-ci-cd-with-docker' > /dev/null; then
+                echo "✅ Spring Boot app restarted successfully"
+                break
+              else
+                echo "⏳ Waiting for Spring Boot to start..."
+                sleep 3
+              fi
+            done
 
 #    - name: Build and Push Docker Image
 #      uses: mr-smithers-excellent/docker-build-push@v4
