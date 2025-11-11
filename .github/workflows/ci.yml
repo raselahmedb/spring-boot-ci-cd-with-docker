@@ -59,6 +59,9 @@ jobs:
               fi
             done
 
+      - name: Show deploy status
+        run: "Deploy Status: ${{ steps.deploy.outputs.deploy_status }}"
+
 #    - name: Build and Push Docker Image
 #      uses: mr-smithers-excellent/docker-build-push@v4
 #      with:
