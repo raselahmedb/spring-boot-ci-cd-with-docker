@@ -44,6 +44,8 @@ jobs:
             cd /opt/springapp
             pkill -f 'spring-boot-ci-cd-with-docker' || true
             nohup java -jar target/spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            sleep 5
+            pgrep -f 'spring-boot-ci-cd-with-docker' && echo "✅ Spring Boot app restarted successfully"
 
 #    - name: Build and Push Docker Image
 #      uses: mr-smithers-excellent/docker-build-push@v4
