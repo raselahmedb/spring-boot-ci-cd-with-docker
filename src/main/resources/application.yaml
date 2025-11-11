@@ -1,3 +1,5 @@
 spring:
   application:
     name: spring-boot-ci-cd-with-docker
+server:
+  port: 8989
