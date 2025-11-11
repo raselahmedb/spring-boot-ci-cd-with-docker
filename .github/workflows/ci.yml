@@ -48,7 +48,7 @@ jobs:
             cd /opt/springapp
             pkill -f 'spring-boot-ci-cd-with-docker' || true
             nohup /usr/bin/java -jar /opt/springapp/spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar > /opt/springapp/app.log 2>&1 &
-            sleep 5s
+            sleep 60s
             for i in {1..20}; do
               if pgrep -f 'spring-boot-ci-cd-with-docker' > /dev/null; then
                 echo "✅ Spring Boot app restarted successfully"
