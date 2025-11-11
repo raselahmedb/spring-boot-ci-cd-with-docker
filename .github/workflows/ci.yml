@@ -1,5 +1,3 @@
-
-
 name: Java CI/CD with JAR Deploy
 
 on:
@@ -31,8 +29,9 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "./target/spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar"
-          target: "/opt/springapp"
+          source: "target/*.jar"
+          target: "/opt/springapp/"
+          strip_components: 1
 
       - name: Restart Spring Boot App on server
         uses: appleboy/ssh-action@v1.0.0
@@ -42,10 +41,42 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /opt/springapp
-            pkill -f 'spring-boot-ci-cd-with-docker' || true
-            nohup java -jar target/spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-            sleep 5
-            pgrep -f 'spring-boot-ci-cd-with-docker' && echo "✅ Spring Boot app restarted successfully"
+            # Find and kill the existing application
+            APP_PID=$(pgrep -f 'spring-boot-ci-cd-with-docker' || echo "")
+            if [ ! -z "$APP_PID" ]; then
+              echo "Stopping existing application with PID: $APP_PID"
+              kill $APP_PID
+              sleep 5
+              # Force kill if still running
+              if ps -p $APP_PID > /dev/null; then
+                kill -9 $APP_PID
+                sleep 2
+              fi
+            fi
+            
+            # Find the JAR file (handles version changes)
+            JAR_FILE=$(ls *.jar | head -n 1)
+            if [ -z "$JAR_FILE" ]; then
+              echo "❌ No JAR file found!"
+              exit 1
+            fi
+            
+            echo "Starting application: $JAR_FILE"
+            nohup java -jar "$JAR_FILE" > app.log 2>&1 &
+            
+            # Wait for app to start
+            sleep 10
+            
+            # Verify the application started successfully
+            if pgrep -f 'spring-boot-ci-cd-with-docker' > /dev/null; then
+              echo "✅ Spring Boot app restarted successfully"
+              echo "Application is running with PID: $(pgrep -f 'spring-boot-ci-cd-with-docker')"
+            else
+              echo "❌ Failed to start Spring Boot app"
+              echo "Last 50 lines of app.log:"
+              tail -50 app.log
+              exit 1
+            fi
 
 #    - name: Build and Push Docker Image
 #      uses: mr-smithers-excellent/docker-build-push@v4
