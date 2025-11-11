@@ -43,6 +43,7 @@ jobs:
           script: |
             cd /opt/springapp
             pkill -f 'spring-boot-ci-cd-with-docker' || true
+            cp target/spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar .
             nohup java -jar spring-boot-ci-cd-with-docker-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
 
 #    - name: Build and Push Docker Image
